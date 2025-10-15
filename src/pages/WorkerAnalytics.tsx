@@ -5,6 +5,7 @@ import { mockWorkers } from '@/data/mockData';
 import StatusBadge from '@/components/StatusBadge';
 import { MapPin, Clock, Wind, Droplets, Activity, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import WorkerMap from '@/components/WorkerMap';
 
 const WorkerAnalytics = () => {
   const [selectedWorker, setSelectedWorker] = useState(mockWorkers[0]);
@@ -234,14 +235,8 @@ const WorkerAnalytics = () => {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="aspect-video bg-muted rounded-lg flex items-center justify-center mb-4">
-                        <div className="text-center">
-                          <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-                          <p className="text-sm text-muted-foreground">Map Interface</p>
-                          <p className="text-xs text-muted-foreground">
-                            Showing: {selectedWorker.location.zone}
-                          </p>
-                        </div>
+                      <div className="mb-4">
+                        <WorkerMap workers={mockWorkers} selectedWorker={selectedWorker} />
                       </div>
                       <div className="space-y-2">
                         <div className="flex justify-between p-2 bg-card/50 rounded">

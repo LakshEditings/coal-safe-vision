@@ -8,27 +8,36 @@ import WorkerAnalytics from "./pages/WorkerAnalytics";
 import EntryCheck from "./pages/EntryCheck";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/Navbar";
+import WorkerDashboard from "./pages/WorkerDashboard";
+import SupervisorDashboard from "./pages/SupervisorDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
+import { RoleProvider } from "./context/RoleContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <div className="min-h-screen bg-background">
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/analytics" element={<WorkerAnalytics />} />
-            <Route path="/entry-check" element={<EntryCheck />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </div>
-      </BrowserRouter>
-    </TooltipProvider>
+    <RoleProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <div className="min-h-screen bg-background">
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/analytics" element={<WorkerAnalytics />} />
+              <Route path="/entry-check" element={<EntryCheck />} />
+              <Route path="/worker-dashboard" element={<WorkerDashboard />} />
+              <Route path="/supervisor-dashboard" element={<SupervisorDashboard />} />
+              <Route path="/admin-dashboard" element={<AdminDashboard />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
+        </BrowserRouter>
+      </TooltipProvider>
+    </RoleProvider>
   </QueryClientProvider>
 );
 
