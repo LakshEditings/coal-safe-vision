@@ -5,7 +5,17 @@ import { mockWorkers } from '@/data/mockData';
 import StatusBadge from '@/components/StatusBadge';
 import { MapPin, Clock, Wind, Droplets, Activity, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import WorkerMap from '@/components/WorkerMap';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix for default marker icons in react-leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 const WorkerAnalytics = () => {
   const [selectedWorker, setSelectedWorker] = useState(mockWorkers[0]);
@@ -18,6 +28,16 @@ const WorkerAnalytics = () => {
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     return `${hours}h ${minutes}m`;
   };
+
+  const neyveliMine = [11.5540, 79.4802];
+
+  const selectedMine = {
+    name: "Neyveli Coal Mine",
+    location: {
+      zone: "Neyveli, Tamil Nadu"
+    }
+  };
+
 
   return (
     <div className="container mx-auto p-6">
@@ -38,11 +58,10 @@ const WorkerAnalytics = () => {
                 <button
                   key={worker.id}
                   onClick={() => setSelectedWorker(worker)}
-                  className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                    selectedWorker.id === worker.id
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:bg-accent/5'
-                  }`}
+                  className={`w-full text-left p-3 rounded-lg border transition-colors ${selectedWorker.id === worker.id
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:bg-accent/5'
+                    }`}
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -52,7 +71,7 @@ const WorkerAnalytics = () => {
                     <StatusBadge
                       status={
                         worker.status === 'active' ? 'active' :
-                        worker.status === 'exited' ? 'safe' : 'danger'
+                          worker.status === 'exited' ? 'safe' : 'danger'
                       }
                     >
                       {worker.status}
@@ -139,6 +158,21 @@ const WorkerAnalytics = () => {
                       Last updated: {new Date(selectedWorker.lastUpdate).toLocaleTimeString('en-IN')}
                     </p>
                   </div>
+
+                  {/* Free map interface (Leaflet with OpenStreetMap) below Current Location */}
+                  <div className="mt-4 h-80 rounded-lg overflow-hidden border border-border">
+                    <MapContainer center={neyveliMine} zoom={13} style={{ height: '100%', width: '100%' }}>
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      <Marker position={neyveliMine}>
+                        <Popup>
+                          {selectedMine.name}<br />Zone: {selectedMine.location.zone}
+                        </Popup>
+                      </Marker>
+                    </MapContainer>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="vitals" className="space-y-4 mt-4">
@@ -157,7 +191,7 @@ const WorkerAnalytics = () => {
                             <StatusBadge
                               status={
                                 selectedWorker.gasLevel < 2.5 ? 'safe' :
-                                selectedWorker.gasLevel < 4 ? 'warning' : 'danger'
+                                  selectedWorker.gasLevel < 4 ? 'warning' : 'danger'
                               }
                             >
                               {selectedWorker.gasLevel} ppm
@@ -165,10 +199,9 @@ const WorkerAnalytics = () => {
                           </div>
                           <div className="w-full bg-muted rounded-full h-3">
                             <div
-                              className={`h-3 rounded-full transition-all ${
-                                selectedWorker.gasLevel < 2.5 ? 'bg-success' :
+                              className={`h-3 rounded-full transition-all ${selectedWorker.gasLevel < 2.5 ? 'bg-success' :
                                 selectedWorker.gasLevel < 4 ? 'bg-warning' : 'bg-destructive'
-                              }`}
+                                }`}
                               style={{ width: `${Math.min((selectedWorker.gasLevel / 5) * 100, 100)}%` }}
                             />
                           </div>
@@ -197,7 +230,7 @@ const WorkerAnalytics = () => {
                             <StatusBadge
                               status={
                                 selectedWorker.oxygenLevel > 19.5 ? 'safe' :
-                                selectedWorker.oxygenLevel > 18 ? 'warning' : 'danger'
+                                  selectedWorker.oxygenLevel > 18 ? 'warning' : 'danger'
                               }
                             >
                               {selectedWorker.oxygenLevel}%
@@ -205,10 +238,9 @@ const WorkerAnalytics = () => {
                           </div>
                           <div className="w-full bg-muted rounded-full h-3">
                             <div
-                              className={`h-3 rounded-full transition-all ${
-                                selectedWorker.oxygenLevel > 19.5 ? 'bg-success' :
+                              className={`h-3 rounded-full transition-all ${selectedWorker.oxygenLevel > 19.5 ? 'bg-success' :
                                 selectedWorker.oxygenLevel > 18 ? 'bg-warning' : 'bg-destructive'
-                              }`}
+                                }`}
                               style={{ width: `${(selectedWorker.oxygenLevel / 21) * 100}%` }}
                             />
                           </div>
@@ -224,37 +256,60 @@ const WorkerAnalytics = () => {
                 </TabsContent>
 
                 <TabsContent value="location" className="space-y-4 mt-4">
-                  <Card>
+                  <Card className="overflow-hidden border border-border shadow-md hover:shadow-lg transition-all duration-300">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <MapPin className="h-5 w-5 text-destructive" />
-                        GPS Tracking
+                        Real-Time Location Tracking
                       </CardTitle>
                       <CardDescription>
-                        Updates every 2-5 minutes via underground relay system
+                        Live map visualization of worker’s position in the mine area
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <div className="mb-4">
-                        <WorkerMap workers={mockWorkers} selectedWorker={selectedWorker} />
+
+                    <CardContent className="space-y-4">
+                      {/* Interactive Map */}
+                      <div className="h-80 rounded-xl overflow-hidden border border-border">
+                        <MapContainer center={neyveliMine} zoom={13} style={{ height: '100%', width: '100%' }}>
+                          <TileLayer
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                          />
+                          <Marker position={neyveliMine}>
+                            <Popup>
+                              {selectedMine.name}<br />Zone: {selectedMine.location.zone}
+                            </Popup>
+                          </Marker>
+                        </MapContainer>
                       </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between p-2 bg-card/50 rounded">
-                          <span className="text-sm text-muted-foreground">Zone</span>
-                          <span className="text-sm font-semibold">{selectedWorker.location.zone}</span>
+
+                      {/* Location Stats */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="p-3 bg-card/50 rounded-lg border border-border flex flex-col items-center">
+                          <p className="text-xs text-muted-foreground">Current Zone</p>
+                          <p className="font-semibold text-center">{selectedWorker.location.zone}</p>
                         </div>
-                        <div className="flex justify-between p-2 bg-card/50 rounded">
-                          <span className="text-sm text-muted-foreground">Coordinates</span>
-                          <span className="text-sm font-mono">
+                        <div className="p-3 bg-card/50 rounded-lg border border-border flex flex-col items-center">
+                          <p className="text-xs text-muted-foreground">Coordinates</p>
+                          <p className="font-mono text-sm text-center">
                             {selectedWorker.location.lat}, {selectedWorker.location.lng}
-                          </span>
+                          </p>
                         </div>
-                        <div className="flex justify-between p-2 bg-card/50 rounded">
-                          <span className="text-sm text-muted-foreground">Last Update</span>
-                          <span className="text-sm font-semibold">
+                        <div className="p-3 bg-card/50 rounded-lg border border-border flex flex-col items-center">
+                          <p className="text-xs text-muted-foreground">Last Updated</p>
+                          <p className="font-semibold">
                             {new Date(selectedWorker.lastUpdate).toLocaleTimeString('en-IN')}
-                          </span>
+                          </p>
                         </div>
+                      </div>
+
+                      {/* Additional Info Section */}
+                      <div className="p-3 rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-border text-sm text-white/80">
+                        <p>
+                          Worker is currently being tracked within <span className="font-semibold text-white">
+                            {selectedWorker.location.zone}
+                          </span>. GPS updates are received every 2–5 minutes via the underground relay system.
+                        </p>
                       </div>
                     </CardContent>
                   </Card>
@@ -290,7 +345,7 @@ const WorkerAnalytics = () => {
                                 {selectedWorker.exitTime ? 'Exit' : 'Duration'}
                               </p>
                               <p className="font-semibold">
-                                {selectedWorker.exitTime 
+                                {selectedWorker.exitTime
                                   ? new Date(selectedWorker.exitTime).toLocaleTimeString('en-IN')
                                   : calculateDuration(selectedWorker.entryTime)
                                 }

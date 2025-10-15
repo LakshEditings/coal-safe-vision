@@ -12,6 +12,7 @@ import WorkerDashboard from "./pages/WorkerDashboard";
 import SupervisorDashboard from "./pages/SupervisorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import { RoleProvider } from "./context/RoleContext";
+import QueryDashboard from "./pages/QueryDashboard";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
               <Route path="/" element={<Dashboard />} />
               <Route path="/analytics" element={<WorkerAnalytics />} />
               <Route path="/entry-check" element={<EntryCheck />} />
+              <Route path="/query-dashboard" element={<QueryDashboard />} />
               <Route path="/worker-dashboard" element={<WorkerDashboard />} />
               <Route path="/supervisor-dashboard" element={<SupervisorDashboard />} />
               <Route path="/admin-dashboard" element={<AdminDashboard />} />
